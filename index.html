@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>五子棋游戏</title>
+    <style media="screen">
+      #canvas{
+        display: block;
+        margin: 100px auto;
+        box-shadow: -2px -2px 2px #efefef,5px 5px 5px #b9b9b9
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="450" height="450"></canvas>
+    <script type="text/javascript">
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const bg = new Image();
+      bg.src = 'img/wood.jpg';
+      bg.onload = function () {
+        ctx.drawImage(bg,0,0,450,450);
+        drawLine();
+      }
+      let me = true;
+      let save = [];
+      for (let i = 0; i <15; i++) {
+        save[i] = [];
+        for (let j = 0; j <15; j++) {
+          save[i][j] = 0;  //没有落子
+        }
+      }
+      // 赢法数组，统计全部的赢法种类
+      let win = [];
+      for (let i = 0; i <15; i++) {
+        win[i] = [];
+        for (let j = 0; j <15; j++) {
+          win[i][j] = [];
+        }
+      }
+      let count = 0;    //赢法种类
+      // 横线赢法
+      for (let i = 0; i < 15; i++) {
+        for (let j = 0; j < 11; j++) {
+          for (let k = 0; k < 5; k++) {
+            win[i][j+k][count] = true;
+          }
+          count++;
+        }
+      }
+      // 竖线赢法
+      for (let i = 0; i < 15; i++) {
+        for (let j = 0; j < 11; j++) {
+          for (let k = 0; k < 5; k++) {
+            win[j+k][i][count] = true;
+          }
+          count++;
+        }
+      }
+      // 斜线赢法
+      for (let i = 0; i < 11; i++) {
+        for (let j = 0; j < 11; j++) {
+          for (let k = 0; k < 5; k++) {
+            win[i+k][j+k][count] = true;
+          }
+          count++;
+        }
+      }
+      // 反斜线赢法
+      for (let i = 0; i < 11; i++) {
+        for (let j = 14; j > 3; j--) {
+          for (let k = 0; k < 5; k++) {
+            win[i+k][j-k][count] = true;
+          }
+          count++;
+        }
+      }
+      // 赢法统计数组
+      let myWin = [];
+      let ComputerWin = [];
+      for (let i = 0; i < count; i++) {
+        myWin[i] = 0;
+        ComputerWin[i] = 0;
+      }
+      let over = false;
+      canvas.onclick = function (ev) {
+        if(over)return;
+        if(!me)return;
+        let x = ev.offsetX;
+        let y = ev.offsetY;
+        let i = Math.floor(x/30);
+        let j = Math.floor(y/30);
+        if (save[i][j] == 0) {
+          drawChese(i,j,me);
+          save[i][j] = 1;
+          for (let k = 0; k < count; k++) {
+            if (win[i][j][k]) {
+              myWin[k]++;
+              ComputerWin[k] = 'noWay';
+              if (myWin[k] == 5) {
+                alert('你赢了！！！')
+                over = true;
+              }
+            }
+          }
+          if (!over) {
+            me = !me;
+            computerAi();
+          }
+        }
+      }
+      function drawLine() {
+        for (let i = 0; i < 15; i++) {
+          // 棋盘上的横线
+          ctx.moveTo(15+i*30,15);
+          ctx.lineTo(15+i*30,435);
+          ctx.stroke();
+          // 棋盘上的纵线
+          ctx.moveTo(15,15+i*30);
+          ctx.lineTo(435,15+i*30);
+          ctx.stroke();
+        }
+      }
+      let drawChese = (i,j,me)=>{
+        ctx.beginPath();
+        ctx.arc(15+i*30,15+j*30,13,0,2*Math.PI)
+        ctx.closePath();
+        let gradient = ctx.createRadialGradient(15+i*30+2,15+j*30-2,13,15+i*30+2,15+j*30-2,0);
+        if (me) {
+          gradient.addColorStop(0,'#0a0a0a');
+          gradient.addColorStop(1,'#636766');
+        }else {
+          gradient.addColorStop(0,'#d1d1d1');
+          gradient.addColorStop(1,'#f9f9f9');
+        }
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    </script>
+    <script src="js/ai.js" charset="utf-8"></script>
+  </body>
+</html>
